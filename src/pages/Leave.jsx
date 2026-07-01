@@ -78,76 +78,78 @@ const Leave = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         
-        {/* Leave application form (For everyone, but makes sense especially for staff) */}
-        <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
-          <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
-            <HiOutlineDocumentText className="w-5 h-5 text-indigo-505" />
-            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">File Leave Application</h3>
-          </div>
-
-          {successMsg && (
-            <div className="mb-4 p-3 text-xs font-semibold rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">
-              {successMsg}
+        {/* Leave application form (Only visible to non-admin/HR crew) */}
+        {!isAdminOrHR && (
+          <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+              <HiOutlineDocumentText className="w-5 h-5 text-indigo-505" />
+              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">File Leave Application</h3>
             </div>
-          )}
 
-          <form onSubmit={handleApply} className="space-y-4 text-xs">
-            <div>
-              <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Leave Category</label>
-              <select
-                value={leaveType}
-                onChange={(e) => setLeaveType(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none"
+            {successMsg && (
+              <div className="mb-4 p-3 text-xs font-semibold rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">
+                {successMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleApply} className="space-y-4 text-xs">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Leave Category</label>
+                <select
+                  value={leaveType}
+                  onChange={(e) => setLeaveType(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none"
+                >
+                  <option value="Casual Leave">Casual Leave</option>
+                  <option value="Sick Leave">Sick Leave</option>
+                  <option value="Paid Leave">Paid Leave</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Start Date</label>
+                  <input 
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">End Date</label>
+                  <input 
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Detailed Reason</label>
+                <textarea 
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="Explain the reason for leave..."
+                  rows="3"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2 rounded-lg text-xs font-bold text-white bg-indigo-655 hover:bg-indigo-700 transition-colors cursor-pointer"
               >
-                <option value="Casual Leave">Casual Leave</option>
-                <option value="Sick Leave">Sick Leave</option>
-                <option value="Paid Leave">Paid Leave</option>
-              </select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Start Date</label>
-                <input 
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none font-mono"
-                />
-              </div>
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">End Date</label>
-                <input 
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none font-mono"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Detailed Reason</label>
-              <textarea 
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="Explain the reason for leave..."
-                rows="3"
-                className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-2 rounded-lg text-xs font-bold text-white bg-indigo-650 hover:bg-indigo-700 transition-colors cursor-pointer"
-            >
-              Submit Application
-            </button>
-          </form>
-        </div>
+                Submit Application
+              </button>
+            </form>
+          </div>
+        )}
 
         {/* Leave Requests Log List */}
-        <div className="xl:col-span-2 p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
+        <div className={`${isAdminOrHR ? 'xl:col-span-3' : 'xl:col-span-2'} p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl`}>
           <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
             <HiOutlineBadgeCheck className="w-5 h-5 text-indigo-505" />
             <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
