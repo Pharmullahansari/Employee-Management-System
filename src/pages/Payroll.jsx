@@ -25,6 +25,10 @@ const Payroll = () => {
   const [payslipTarget, setPayslipTarget] = useState(null);
   const [payslipMonth, setPayslipMonth] = useState('June 2026');
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
   const selectedEmp = employees.find(e => e.id === (isAdminOrHR ? selectedEmpId : currentUser?.id)) || employees[0];
 
   const handleRecalculate = () => {
@@ -167,48 +171,104 @@ const Payroll = () => {
               <h3 className="text-sm font-black text-black dark:text-white">
                 Salary Ledgers (Ansari Production)
               </h3>
-            </div>
-            
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
+            </div>            <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-2xl">
+              <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50/50 dark:bg-slate-900/50 text-[10px] font-semibold text-black dark:text-slate-200 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
-                    <th className="px-4 py-3">Employee</th>
-                    <th className="px-4 py-3">Base Salary</th>
-                    <th className="px-4 py-3">Provident Fund</th>
-                    <th className="px-4 py-3">Tax Deductions</th>
+                  <tr className="bg-slate-50/50 dark:bg-slate-900/50 text-[10px] font-semibold text-black dark:text-slate-200 uppercase tracking-widest border-b border-slate-200 dark:border-slate-800">
+                    <th className="border-r border-slate-200 dark:border-slate-800 px-4 py-3">Employee</th>
+                    <th className="border-r border-slate-200 dark:border-slate-800 px-4 py-3">Base Salary</th>
+                    <th className="border-r border-slate-200 dark:border-slate-800 px-4 py-3">Provident Fund</th>
+                    <th className="border-r border-slate-200 dark:border-slate-800 px-4 py-3">Tax Deductions</th>
                     <th className="px-4 py-3 text-center">Payslip</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                  {employees.map(emp => {
-                    const pf = Math.round(emp.salary * 0.12);
-                    const tax = Math.round(emp.salary * 0.10);
-                    return (
-                      <tr key={emp.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
-                        <td className="px-4 py-3">
-                          <span className="font-bold text-slate-700 dark:text-slate-350">{emp.name}</span>
-                          <div className="text-[10px] text-slate-450">{emp.designation}</div>
-                        </td>
-                        <td className="px-4 py-3 font-bold text-slate-600 dark:text-slate-400 font-mono">₹{emp.salary.toLocaleString('en-IN')}</td>
-                        <td className="px-4 py-3 text-slate-450 font-mono">₹{pf.toLocaleString('en-IN')}</td>
-                        <td className="px-4 py-3 text-slate-450 font-mono">₹{tax.toLocaleString('en-IN')}</td>
-                        <td className="px-4 py-3 text-center">
-                          <button
-                            onClick={() => handleOpenPayslip(emp)}
-                            className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 transition-all cursor-pointer shadow-2xs"
-                            title="Generate Payslip"
-                          >
-                            <HiOutlineEye className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {(() => {
+                    const totalEntries = employees.length;
+                    const startIndex = (currentPage - 1) * pageSize;
+                    const paginatedEmployees = employees.slice(startIndex, startIndex + pageSize);
+
+                    return paginatedEmployees.map(emp => {
+                      const pf = Math.round(emp.salary * 0.12);
+                      const tax = Math.round(emp.salary * 0.10);
+                      return (
+                        <tr key={emp.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
+                          <td className="border-r border-slate-200 dark:border-slate-800/60 px-4 py-3">
+                            <span className="font-bold text-slate-700 dark:text-slate-350">{emp.name}</span>
+                            <div className="text-[10px] text-slate-450">{emp.designation}</div>
+                          </td>
+                          <td className="border-r border-slate-200 dark:border-slate-800/60 px-4 py-3 font-bold text-slate-600 dark:text-slate-400 font-mono">₹{emp.salary.toLocaleString('en-IN')}</td>
+                          <td className="border-r border-slate-200 dark:border-slate-800/60 px-4 py-3 text-slate-450 font-mono">₹{pf.toLocaleString('en-IN')}</td>
+                          <td className="border-r border-slate-200 dark:border-slate-800/60 px-4 py-3 text-slate-450 font-mono">₹{tax.toLocaleString('en-IN')}</td>
+                          <td className="px-4 py-3 text-center">
+                            <button
+                              onClick={() => handleOpenPayslip(emp)}
+                              className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 text-indigo-650 dark:text-indigo-400 transition-all cursor-pointer shadow-2xs"
+                              title="Generate Payslip"
+                            >
+                              <HiOutlineEye className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })()}
                 </tbody>
               </table>
             </div>
-          </div>
+
+            {/* Pagination Controls */}
+            {(() => {
+              const totalEntries = employees.length;
+              const totalPages = Math.ceil(totalEntries / pageSize) || 1;
+              const startIndex = (currentPage - 1) * pageSize;
+
+              return (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
+                  <div className="text-xs text-slate-450 dark:text-slate-400 font-semibold">
+                    {totalEntries > 0 ? (
+                      `Showing ${startIndex + 1} to ${Math.min(startIndex + pageSize, totalEntries)} of ${totalEntries} entries`
+                    ) : (
+                      'Showing 0 to 0 of 0 entries'
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      Previous
+                    </button>
+                    <span className="w-7 h-7 flex items-center justify-center bg-blue-600 text-white rounded-lg text-xs font-bold shadow-sm font-mono">
+                      {currentPage}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      Next
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      Last
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+            </div>
 
         </div>
       ) : (
@@ -262,45 +322,103 @@ const Payroll = () => {
                 <h3 className="text-sm font-black text-black dark:text-white">Disbursement Ledgers</h3>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
+              <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-2xl">
+                <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-50/50 dark:bg-slate-900/50 text-[10px] font-semibold text-black dark:text-slate-200 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
-                      <th className="px-4 py-3">Month</th>
-                      <th className="px-4 py-3">Transferred Date</th>
-                      <th className="px-4 py-3">Net Compensation</th>
-                      <th className="px-4 py-3 text-center">Status</th>
+                    <tr className="bg-slate-50/50 dark:bg-slate-900/50 text-[10px] font-semibold text-black dark:text-slate-200 uppercase tracking-widest border-b border-slate-200 dark:border-slate-800">
+                      <th className="border-r border-slate-200 dark:border-slate-800 px-4 py-3">Month</th>
+                      <th className="border-r border-slate-200 dark:border-slate-800 px-4 py-3">Transferred Date</th>
+                      <th className="border-r border-slate-200 dark:border-slate-800 px-4 py-3">Net Compensation</th>
+                      <th className="border-r border-slate-200 dark:border-slate-800 px-4 py-3 text-center">Status</th>
                       <th className="px-4 py-3 text-center">Payslip</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                    {pastTransactions.map((tx, idx) => {
-                      const netComp = tx.base + tx.bonus - tx.deductions;
-                      return (
-                        <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
-                          <td className="px-4 py-3 font-bold text-slate-700 dark:text-slate-350">{tx.month}</td>
-                          <td className="px-4 py-3 text-slate-450 font-mono">{tx.date}</td>
-                          <td className="px-4 py-3 font-bold text-slate-600 dark:text-slate-400 font-mono">₹{netComp.toLocaleString('en-IN')}</td>
-                          <td className="px-4 py-3 text-center">
-                            <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-450 border border-emerald-100 dark:border-emerald-900/30">
-                              {tx.status}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <button
-                              onClick={() => handleOpenPayslip(selectedEmp, tx.month)}
-                              className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 text-indigo-650 dark:text-indigo-400 transition-all cursor-pointer shadow-2xs"
-                              title="View Payslip"
-                            >
-                              <HiOutlineEye className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {(() => {
+                      const totalEntries = pastTransactions.length;
+                      const startIndex = (currentPage - 1) * pageSize;
+                      const paginatedTx = pastTransactions.slice(startIndex, startIndex + pageSize);
+
+                      return paginatedTx.map((tx, idx) => {
+                        const netComp = tx.base + tx.bonus - tx.deductions;
+                        return (
+                          <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
+                            <td className="border-r border-slate-200 dark:border-slate-800/60 px-4 py-3 font-bold text-slate-700 dark:text-slate-350">{tx.month}</td>
+                            <td className="border-r border-slate-200 dark:border-slate-800/60 px-4 py-3 text-slate-455 font-mono">{tx.date}</td>
+                            <td className="border-r border-slate-200 dark:border-slate-800/60 px-4 py-3 font-bold text-slate-600 dark:text-slate-400 font-mono">₹{netComp.toLocaleString('en-IN')}</td>
+                            <td className="border-r border-slate-200 dark:border-slate-800/60 px-4 py-3 text-center">
+                              <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-450 border border-emerald-100 dark:border-emerald-900/30">
+                                {tx.status}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <button
+                                onClick={() => handleOpenPayslip(selectedEmp, tx.month)}
+                                className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 text-indigo-650 dark:text-indigo-400 transition-all cursor-pointer shadow-2xs"
+                                title="View Payslip"
+                              >
+                                <HiOutlineEye className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      });
+                    })()}
                   </tbody>
                 </table>
               </div>
+
+              {/* Pagination Controls */}
+              {(() => {
+                const totalEntries = pastTransactions.length;
+                const totalPages = Math.ceil(totalEntries / pageSize) || 1;
+                const startIndex = (currentPage - 1) * pageSize;
+
+                return (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
+                    <div className="text-xs text-slate-450 dark:text-slate-400 font-semibold">
+                      {totalEntries > 0 ? (
+                        `Showing ${startIndex + 1} to ${Math.min(startIndex + pageSize, totalEntries)} of ${totalEntries} entries`
+                      ) : (
+                        'Showing 0 to 0 of 0 entries'
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setCurrentPage(1)}
+                        disabled={currentPage === 1}
+                        className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        First
+                      </button>
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                        className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        Previous
+                      </button>
+                      <span className="w-7 h-7 flex items-center justify-center bg-blue-600 text-white rounded-lg text-xs font-bold shadow-sm font-mono">
+                        {currentPage}
+                      </span>
+                      <button
+                        onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                        className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        Next
+                      </button>
+                      <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                        className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        Last
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
 

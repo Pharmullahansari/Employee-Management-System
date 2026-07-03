@@ -133,12 +133,13 @@ const EmployeeList = () => {
         <div className="overflow-x-auto border-y border-slate-200 dark:border-[#222e43]/60">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-[#222e43] bg-gray-100 text-xs font-bold  uppercase tracking-wider">
+              <tr className="border-b border-slate-200 dark:border-[#222e43] bg-slate-50/50 dark:bg-slate-900/50 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 <th className="px-5 py-3.5 w-12 text-center">#</th>
                 <th className="px-5 py-3.5">Employee Name</th>
                 <th className="px-5 py-3.5">Department</th>
                 <th className="px-5 py-3.5">Email ID</th>
                 <th className="px-5 py-3.5">Mobile Number</th>
+                <th className="px-5 py-3.5">Status</th>
                 <th className="px-5 py-3.5 text-center">Actions</th>
               </tr>
             </thead>
@@ -188,6 +189,17 @@ const EmployeeList = () => {
                         {emp.phone || '9876543210'}
                       </td>
 
+                      {/* Status */}
+                      <td className="px-5 py-3">
+                        <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full border ${
+                          emp.status === 'Inactive' 
+                            ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-955/20 dark:text-rose-450 dark:border-rose-900/30'
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-955/20 dark:text-emerald-400 dark:border-emerald-900/30'
+                        }`}>
+                          {emp.status || 'Active'}
+                        </span>
+                      </td>
+
                       {/* Actions */}
                       <td className="px-5 py-3">
                         <div className="flex items-center justify-center gap-1.5">
@@ -222,7 +234,7 @@ const EmployeeList = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan="6" className="text-center py-10 text-slate-400">
+                  <td colSpan="7" className="text-center py-10 text-slate-400">
                     <p className="font-semibold">No records found matching search filters.</p>
                   </td>
                 </tr>

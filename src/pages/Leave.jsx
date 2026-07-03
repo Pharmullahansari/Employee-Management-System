@@ -25,16 +25,20 @@ const Leave = () => {
   const [successMsg, setSuccessMsg] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
+  const [fromTime, setFromTime] = useState('');
+  const [toTime, setToTime] = useState('');
 
   // Calculate days difference
   useEffect(() => {
     if (duration === 'Single') {
       setNumDays(1);
+    } else if (duration === 'First Half Day' || duration === 'Second Half Day') {
+      setNumDays(0.5);
     } else {
       const start = new Date(fromDate);
       const end = new Date(toDate);
       const diffTime = end.getTime() - start.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 600 * 60 * 24)) + 1;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
       setNumDays(isNaN(diffDays) ? 1 : Math.max(1, diffDays));
     }
   }, [duration, fromDate, toDate]);
@@ -52,6 +56,10 @@ const Leave = () => {
       alert("Please select date and enter reason.");
       return;
     }
+    if (leaveType === 'Short Leave' && (!fromTime || !toTime)) {
+      alert("Please select from time and to time for Short Leave.");
+      return;
+    }
 
     const payload = {
       employeeId: currentUser.id,
@@ -60,7 +68,9 @@ const Leave = () => {
       startDate: fromDate,
       endDate: duration === 'Single' ? fromDate : toDate,
       days: numDays,
-      reason: `[${leaveApplyFor}] - ${reason}`
+      reason: leaveType === 'Short Leave'
+        ? `[${leaveApplyFor}] (${fromTime} to ${toTime}) - ${reason}`
+        : `[${leaveApplyFor}] - ${reason}`
     };
 
     applyLeave(payload);
@@ -74,6 +84,8 @@ const Leave = () => {
     setToDate('2026-07-02');
     setReason('');
     setFileName('');
+    setFromTime('');
+    setToTime('');
 
     setTimeout(() => {
       setSuccessMsg('');
@@ -89,6 +101,8 @@ const Leave = () => {
     setToDate('2026-07-02');
     setReason('');
     setFileName('');
+    setFromTime('');
+    setToTime('');
   };
 
   const handleFileChange = (e) => {
@@ -161,9 +175,8 @@ const Leave = () => {
                   className="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 dark:text-white focus:outline-none cursor-pointer"
                 >
                   <option value="Please Select">Please Select</option>
-                  <option value="Full Day">Full Day</option>
-                  <option value="Half Day">Half Day</option>
-                  <option value="Short Leave">Short Leave</option>
+                  <option value="Full Day">Self</option>
+                  
                 </select>
               </div>
 
@@ -180,7 +193,8 @@ const Leave = () => {
                   <option value="Please Select">Please Select</option>
                   <option value="Casual Leave">Casual Leave</option>
                   <option value="Sick Leave">Sick Leave</option>
-                  <option value="Paid Leave">Paid Leave</option>
+                  <option value="Festival Holidays">Festival Holidays</option>
+                  <option value="Short Leave">Short Leave</option>
                 </select>
               </div>
 
@@ -196,6 +210,8 @@ const Leave = () => {
                 >
                   <option value="Single">Single</option>
                   <option value="Multiple">Multiple</option>
+                  <option value="First Half Day">First Half Day</option>
+                  <option value="Second Half Day">Second Half Day</option>
                 </select>
               </div>
 
@@ -225,8 +241,8 @@ const Leave = () => {
                 />
               </div>
 
-              {/* To Date (Only if Multiple) */}
-              {duration === 'Multiple' ? (
+              {/* To Date (Only if Multiple and NOT Short Leave) */}
+              {duration === 'Multiple' && leaveType !== 'Short Leave' ? (
                 <div>
                   <label className="block text-[11px] font-extrabold text-slate-800 dark:text-slate-250 uppercase tracking-wider mb-1.5">
                     To Date <span className="text-rose-500">*</span>
@@ -240,6 +256,41 @@ const Leave = () => {
                 </div>
               ) : (
                 <div className="hidden md:block" />
+              )}
+
+              {/* Short Leave Time Pickers */}
+              {leaveType === 'Short Leave' && (
+                <>
+                  <div>
+                    <label className="block text-[11px] font-extrabold text-slate-800 dark:text-slate-250 uppercase tracking-wider mb-1.5">
+                      From Time <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="time"
+                      value={fromTime}
+                      onChange={(e) => setFromTime(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 dark:text-white focus:outline-none font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-extrabold text-slate-800 dark:text-slate-250 uppercase tracking-wider mb-1.5">
+                      To Time <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      type="time"
+                      value={toTime}
+                      onChange={(e) => setToTime(e.target.value)}
+                      className="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 dark:text-white focus:outline-none font-mono"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <p className="text-xs font-bold text-red-500">
+                      Note:- Short Time must be between Shift Timings
+                    </p>
+                  </div>
+                </>
               )}
 
               {/* Reason for Leave */}

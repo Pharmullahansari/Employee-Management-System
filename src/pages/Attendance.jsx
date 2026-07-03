@@ -4,7 +4,16 @@ import { HiOutlineCheckCircle, HiOutlineCalendar, HiPlus, HiPencil, HiTrash, HiX
 
 const Attendance = () => {
   const { currentUser, employees, attendance, logAttendance } = useData();
-  const [selectedDate, setSelectedDate] = useState('2026-06-23'); // Default matches image
+  
+  const getTodayDateStr = () => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
+  const [selectedDate, setSelectedDate] = useState(getTodayDateStr());
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
@@ -61,7 +70,7 @@ const Attendance = () => {
   const [showEditModal, setShowEditModal] = useState(false);
 
   // Forms states
-  const [logForm, setLogForm] = useState({ employeeId: '', date: '2026-06-23', checkIn: '09:00', checkOut: '18:00', status: 'Present' });
+  const [logForm, setLogForm] = useState({ employeeId: '', date: getTodayDateStr(), checkIn: '09:00', checkOut: '18:00', status: 'Present' });
   const [editForm, setEditForm] = useState({ employeeId: '', date: '', checkIn: '', checkOut: '', status: 'Present', originalKey: '' });
 
   const todayRecordKey = currentUser ? `${selectedDate}-${currentUser.id}` : '';
@@ -154,7 +163,7 @@ const Attendance = () => {
     logAttendance(logForm.date, logForm.employeeId, logForm.status === 'Present' || logForm.status === 'Late' ? 'Present' : logForm.status);
 
     setShowLogModal(false);
-    setLogForm({ employeeId: '', date: '2026-06-23', checkIn: '09:00', checkOut: '18:00', status: 'Present' });
+    setLogForm({ employeeId: '', date: getTodayDateStr(), checkIn: '09:00', checkOut: '18:00', status: 'Present' });
   };
 
   const handleSaveEdit = (e) => {

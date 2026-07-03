@@ -1,2 +1,75 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+body {
+  color: #0f172a; /* text-slate-900 */
+}
+
+.dark body {
+  color: #ffffff; /* text-white */
+}
+
+/* MUI Charts Dark Mode Overrides */
+.dark .MuiChartsAxis-tickLabel {
+  fill: #f1f5f9 !important; /* slate-100 */
+}
+
+.dark .MuiChartsAxis-line,
+.dark .MuiChartsAxis-tick {
+  stroke: #334155 !important; /* slate-700 */
+}
+
+.dark .MuiChartsLegend-root text {
+  fill: #f1f5f9 !important; /* slate-100 */
+}
+
+/* Fallback for all SVG text elements in dark mode */
+.dark svg text,
+.dark svg text tspan,
+.dark svg tspan {
+  fill: #f1f5f9 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Global Dark Mode Form Inputs and Dropdowns Override */
+.dark select,
+.dark input,
+.dark textarea {
+  color: #f1f5f9 !important; /* Force readable off-white text */
+  background-color: #0f172a !important; /* Force dark slate background */
+  border-color: #334155 !important; /* Force slate-700 border */
+}
+
+/* Style dropdown options */
+.dark select option {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+}
+
+/* Styling placeholders in dark mode */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b !important; /* slate-500 placeholder */
+}
+
+/* Global Table Headers Override */
+th {
+  background-color: #f3f4f6 !important; /* bg-gray-100 */
+  color: #475569 !important; /* text-slate-600 */
+}
+
+/* Global Dark Mode Table Headers Override */
+.dark th {
+  background-color: #0f172a !important; /* dark slate background */
+  color: #f1f5f9 !important; /* off-white text */
+  border-color: #1e293b !important; /* dark border */
+}
+
+
+
+
+
+
+
+

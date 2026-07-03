@@ -276,7 +276,7 @@ const Dashboard = () => {
                 <div className="mt-auto">
                   <span 
                     onClick={(e) => { e.stopPropagation(); navigate('/leaves'); }}
-                    className="text-[11px] font-extrabold text-purple-600 dark:text-purple-400 hover:underline inline-flex items-center gap-1"
+                    className="text-[11px] cursor-pointer font-extrabold text-purple-600 dark:text-purple-400 hover:underline inline-flex items-center gap-1"
                   >
                     View Details &rarr;
                   </span>
