@@ -81,10 +81,20 @@ const AddEmployee = () => {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between text-left">
         <div>
-          <h2 className="text-base lg:text-lg font-bold text-slate-800 dark:text-white">Onboard New Crew Member</h2>
-          <p className="text-[11px] text-slate-400">Fill in the professional and personal information below to create the employee record.</p>
+          <div className="text-[11px] text-slate-405 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">
+            <span 
+              onClick={() => navigate('/employees')} 
+              className="hover:text-blue-600 dark:hover:text-blue-450 cursor-pointer transition-colors"
+            >
+              Employee List
+            </span> &rsaquo; <span className="text-blue-500 font-extrabold">Add employee</span>
+          </div>
+          <h2 className="text-xl font-extrabold text-slate-800 dark:text-white tracking-tight">
+            Add New Employee 
+          </h2>
+          <p className="text-[11px] text-slate-405 dark:text-slate-400 mt-1">Fill in the professional and personal information below to create the employee record.</p>
         </div>
       </div>
 
@@ -323,7 +333,7 @@ const AddEmployee = () => {
           </button>
           <button 
             type="submit"
-            className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-indigo-500 to-violet-650 hover:from-indigo-650 hover:to-violet-700 shadow-md shadow-indigo-500/10 cursor-pointer"
+            className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-colors cursor-pointer"
           >
             Save Employee
           </button>

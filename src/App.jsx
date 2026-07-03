@@ -17,7 +17,6 @@ import Attendance from './pages/Attendance';
 import Leave from './pages/Leave';
 import Payroll from './pages/Payroll';
 import Department from './pages/Department';
-import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 
 // Route Guards
@@ -78,7 +77,6 @@ function App() {
                 <Route path="/leaves" element={<Leave />} />
                 <Route path="/payroll" element={<Payroll />} />
                 <Route path="/departments" element={<Department />} />
-                <Route path="/reports" element={<Reports />} />
                 <Route path="/settings" element={<Settings />} />
               </Route>
             </Route>

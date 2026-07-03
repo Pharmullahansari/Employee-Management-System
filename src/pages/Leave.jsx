@@ -1,36 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { HiOutlineDocumentText, HiOutlineCalendar, HiOutlineBadgeCheck, HiCheck, HiX } from 'react-icons/hi';
+import { HiOutlineDocumentText, HiOutlineBadgeCheck, HiCheck, HiX, HiOutlinePlus } from 'react-icons/hi';
 
 const Leave = () => {
   const { currentUser, leaves, applyLeave, updateLeaveStatus, employees } = useData();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const searchParams = new URLSearchParams(location.search);
+  const isAdding = searchParams.get('add') === 'true';
 
   const isAdminOrHR = currentUser && (currentUser.role === 'Admin' || currentUser.role === 'HR');
 
-  // Form state
-  const [leaveType, setLeaveType] = useState('Casual Leave');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  // Form states
+  const [leaveApplyFor, setLeaveApplyFor] = useState('Please Select');
+  const [leaveType, setLeaveType] = useState('Please Select');
+  const [duration, setDuration] = useState('Single');
+  const [fromDate, setFromDate] = useState('2026-07-02');
+  const [toDate, setToDate] = useState('2026-07-02');
+  const [numDays, setNumDays] = useState(1);
   const [reason, setReason] = useState('');
+  const [fileName, setFileName] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  // Calculate days difference
+  useEffect(() => {
+    if (duration === 'Single') {
+      setNumDays(1);
+    } else {
+      const start = new Date(fromDate);
+      const end = new Date(toDate);
+      const diffTime = end.getTime() - start.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 600 * 60 * 24)) + 1;
+      setNumDays(isNaN(diffDays) ? 1 : Math.max(1, diffDays));
+    }
+  }, [duration, fromDate, toDate]);
 
   // Find leave balance for self
   const myProfile = employees.find(e => e.id === currentUser?.id) || employees[0];
 
   const handleApply = (e) => {
     e.preventDefault();
-    if (!startDate || !endDate || !reason) {
-      alert("Please enter valid dates and reasons.");
+    if (leaveApplyFor === 'Please Select' || leaveType === 'Please Select') {
+      alert("Please select Leave Apply For and Leave Type options.");
       return;
     }
-
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const timeDiff = end.getTime() - start.getTime();
-    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
-
-    if (daysDiff <= 0) {
-      alert("End date must be after start date.");
+    if (!fromDate || !reason) {
+      alert("Please select date and enter reason.");
       return;
     }
 
@@ -38,197 +57,458 @@ const Leave = () => {
       employeeId: currentUser.id,
       employeeName: currentUser.name,
       type: leaveType,
-      startDate,
-      endDate,
-      days: daysDiff,
-      reason
+      startDate: fromDate,
+      endDate: duration === 'Single' ? fromDate : toDate,
+      days: numDays,
+      reason: `[${leaveApplyFor}] - ${reason}`
     };
 
     applyLeave(payload);
     setSuccessMsg('Leave request submitted successfully. Awaiting HR review!');
-    setStartDate('');
-    setEndDate('');
+    
+    // Clear form
+    setLeaveApplyFor('Please Select');
+    setLeaveType('Please Select');
+    setDuration('Single');
+    setFromDate('2026-07-02');
+    setToDate('2026-07-02');
     setReason('');
-    setTimeout(() => setSuccessMsg(''), 4000);
+    setFileName('');
+
+    setTimeout(() => {
+      setSuccessMsg('');
+      navigate('/leaves');
+    }, 3000);
   };
 
-  // Filter requests shown
+  const handleReset = () => {
+    setLeaveApplyFor('Please Select');
+    setLeaveType('Please Select');
+    setDuration('Single');
+    setFromDate('2026-07-02');
+    setToDate('2026-07-02');
+    setReason('');
+    setFileName('');
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setFileName(e.target.files[0].name);
+    }
+  };
+
   const visibleLeaves = isAdminOrHR ? leaves : leaves.filter(l => l.employeeId === currentUser?.id);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-left">
       
-      {/* Leave Balance Grid */}
-      {myProfile && (
-        <div className="grid grid-cols-3 gap-4">
-          <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Casual balance</p>
-            <h3 className="text-xl font-black text-slate-800 dark:text-white font-mono">{myProfile.leaveBalance.casual} <span className="text-xs font-semibold text-slate-400">/ 10 Days</span></h3>
+      {/* Title & Breadcrumbs */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+        <div>
+          <div className="text-[11px] text-slate-405 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">
+            <span 
+              onClick={() => navigate('/')} 
+              className="hover:text-blue-600 dark:hover:text-blue-450 cursor-pointer transition-colors"
+            >
+              Home
+            </span> &rsaquo;{' '}
+            <span 
+              onClick={() => navigate('/leaves')} 
+              className="hover:text-blue-600 dark:hover:text-blue-450 cursor-pointer transition-colors"
+            >
+              Leave Log
+            </span>
+            {isAdding && <> &rsaquo; <span className="text-blue-500 font-extrabold">Apply Leave</span></>}
           </div>
-          <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Sick balance</p>
-            <h3 className="text-xl font-black text-slate-800 dark:text-white font-mono">{myProfile.leaveBalance.sick} <span className="text-xs font-semibold text-slate-400">/ 10 Days</span></h3>
-          </div>
-          <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Paid balance</p>
-            <h3 className="text-xl font-black text-slate-800 dark:text-white font-mono">{myProfile.leaveBalance.paid} <span className="text-xs font-semibold text-slate-400">/ 15 Days</span></h3>
-          </div>
+          <h2 className="text-2xl font-extrabold text-slate-800 dark:text-white tracking-tight">
+            {isAdding ? 'Apply Leave Request' : 'Leave Management'}
+          </h2>
         </div>
-      )}
+        {!isAdding && !isAdminOrHR && (
+          <button
+            onClick={() => navigate('/leaves?add=true')}
+            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-sm"
+          >
+            <HiOutlinePlus className="w-4 h-4" /> Apply Leave
+          </button>
+        )}
+      </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        
-        {/* Leave application form (Only visible to non-admin/HR crew) */}
-        {!isAdminOrHR && (
-          <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
-            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
-              <HiOutlineDocumentText className="w-5 h-5 text-indigo-505" />
-              <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">File Leave Application</h3>
-            </div>
+      {isAdding ? (
+        /* Apply Leave Page Layout */
+        <div className="bg-white dark:bg-[#151c28] border border-gray-200 dark:border-[#222e43] rounded-2xl overflow-hidden shadow-xs">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-[#222e43]/60">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-white">Apply Leave Form</h3>
+          </div>
 
+          <form onSubmit={handleApply} className="p-6 space-y-6 text-xs text-slate-700 dark:text-slate-350">
             {successMsg && (
-              <div className="mb-4 p-3 text-xs font-semibold rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">
+              <div className="p-3 text-xs font-semibold rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">
                 {successMsg}
               </div>
             )}
 
-            <form onSubmit={handleApply} className="space-y-4 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              
+              {/* Leave Apply For */}
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Leave Category</label>
+                <label className="block text-[11px] font-extrabold text-slate-800 dark:text-slate-250 uppercase tracking-wider mb-1.5">
+                  Leave Apply For <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={leaveApplyFor}
+                  onChange={(e) => setLeaveApplyFor(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 dark:text-white focus:outline-none cursor-pointer"
+                >
+                  <option value="Please Select">Please Select</option>
+                  <option value="Full Day">Full Day</option>
+                  <option value="Half Day">Half Day</option>
+                  <option value="Short Leave">Short Leave</option>
+                </select>
+              </div>
+
+              {/* Leave Type */}
+              <div>
+                <label className="block text-[11px] font-extrabold text-slate-800 dark:text-slate-250 uppercase tracking-wider mb-1.5">
+                  Leave Type <span className="text-rose-500">*</span>
+                </label>
                 <select
                   value={leaveType}
                   onChange={(e) => setLeaveType(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none"
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 dark:text-white focus:outline-none cursor-pointer"
                 >
+                  <option value="Please Select">Please Select</option>
                   <option value="Casual Leave">Casual Leave</option>
                   <option value="Sick Leave">Sick Leave</option>
                   <option value="Paid Leave">Paid Leave</option>
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Start Date</label>
-                  <input 
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">End Date</label>
-                  <input 
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none font-mono"
-                  />
-                </div>
+              {/* Leave Duration */}
+              <div>
+                <label className="block text-[11px] font-extrabold text-slate-800 dark:text-slate-250 uppercase tracking-wider mb-1.5">
+                  Leave Duration <span className="text-rose-500">*</span>
+                </label>
+                <select
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 dark:text-white focus:outline-none cursor-pointer"
+                >
+                  <option value="Single">Single</option>
+                  <option value="Multiple">Multiple</option>
+                </select>
               </div>
 
+              {/* No. of leaves */}
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Detailed Reason</label>
-                <textarea 
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="Explain the reason for leave..."
-                  rows="3"
-                  className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white focus:outline-none"
+                <label className="block text-[11px] font-extrabold text-slate-800 dark:text-slate-250 uppercase tracking-wider mb-1.5">
+                  No. of leaves <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={numDays}
+                  readOnly
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-955/60 dark:text-slate-400 font-extrabold focus:outline-none cursor-not-allowed text-slate-500"
                 />
               </div>
 
+              {/* From Date */}
+              <div>
+                <label className="block text-[11px] font-extrabold text-slate-800 dark:text-slate-250 uppercase tracking-wider mb-1.5">
+                  From Date <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 dark:text-white focus:outline-none font-mono"
+                />
+              </div>
+
+              {/* To Date (Only if Multiple) */}
+              {duration === 'Multiple' ? (
+                <div>
+                  <label className="block text-[11px] font-extrabold text-slate-800 dark:text-slate-250 uppercase tracking-wider mb-1.5">
+                    To Date <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={toDate}
+                    onChange={(e) => setToDate(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 dark:text-white focus:outline-none font-mono"
+                  />
+                </div>
+              ) : (
+                <div className="hidden md:block" />
+              )}
+
+              {/* Reason for Leave */}
+              <div className="md:col-span-1">
+                <label className="block text-[11px] font-extrabold text-slate-800 dark:text-slate-250 uppercase tracking-wider mb-1.5">
+                  Reason for Leave <span className="text-rose-500">*</span>
+                </label>
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="Enter reason here..."
+                  rows="4"
+                  className="w-full px-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 dark:text-white focus:outline-none"
+                />
+              </div>
+
+              {/* Upload Document */}
+              <div className="md:col-span-1">
+                <label className="block text-[11px] font-extrabold text-slate-800 dark:text-slate-250 uppercase tracking-wider mb-1.5">
+                  Upload Document <span className="text-[#f43f5e]">(Max 7 MB)</span>
+                </label>
+                <div className="flex items-center gap-2 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden bg-white dark:bg-slate-950 p-1.5">
+                  <label className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-850 rounded-lg cursor-pointer text-slate-700 dark:text-slate-350 font-bold border border-gray-200 dark:border-slate-800/50 transition-all select-none">
+                    Choose File
+                    <input type="file" onChange={handleFileChange} className="hidden" />
+                  </label>
+                  <span className="text-xs text-slate-400 dark:text-slate-500 truncate px-2">
+                    {fileName || 'No file chosen'}
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-450 dark:text-slate-550 font-bold mt-1.5">
+                  eg: image,pdf,doc
+                </p>
+              </div>
+
+            </div>
+
+            {/* Form Actions */}
+            <div className="flex items-center gap-3 pt-4">
               <button
                 type="submit"
-                className="w-full py-2 rounded-lg text-xs font-bold text-white bg-indigo-655 hover:bg-indigo-700 transition-colors cursor-pointer"
+                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-xs active:scale-98"
               >
-                Submit Application
+                Submit
               </button>
-            </form>
-          </div>
-        )}
+              <button
+                type="button"
+                onClick={handleReset}
+                className="px-6 py-2.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-bold border border-gray-200 dark:border-slate-800 transition-all cursor-pointer shadow-xs active:scale-98"
+              >
+                Reset
+              </button>
+            </div>
 
-        {/* Leave Requests Log List */}
-        <div className={`${isAdminOrHR ? 'xl:col-span-3' : 'xl:col-span-2'} p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl`}>
-          <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
-            <HiOutlineBadgeCheck className="w-5 h-5 text-indigo-505" />
-            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-              {isAdminOrHR ? "All Leave Requests" : "Your Leave Log"}
-            </h3>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-slate-50/50 dark:bg-slate-900/50 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
-                  <th className="px-4 py-3">Employee</th>
-                  <th className="px-4 py-3">Dates</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Reason</th>
-                  <th className="px-4 py-3 text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                {visibleLeaves.length > 0 ? (
-                  visibleLeaves.map((l) => (
-                    <tr key={l.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/10">
-                      <td className="px-4 py-3">
-                        <span className="font-semibold text-slate-700 dark:text-slate-200">{l.employeeName}</span>
-                      </td>
-                      <td className="px-4 py-3 text-slate-500 font-mono">
-                        {l.startDate} <span className="text-[10px] text-slate-400">to</span> {l.endDate}
-                        <div className="text-[10px] text-slate-400 mt-0.5">{l.days} Days</div>
-                      </td>
-                      <td className="px-4 py-3 text-slate-600 dark:text-slate-400 font-medium">{l.type}</td>
-                      <td className="px-4 py-3 text-slate-500 italic max-w-xs truncate" title={l.reason}>
-                        {l.reason}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-col items-center gap-1.5">
-                          <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider
-                            ${l.status === 'Approved' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400' :
-                              l.status === 'Pending' ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400' :
-                              'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-455'}`}
-                          >
-                            {l.status}
-                          </span>
-
-                          {/* HR approval panel actions */}
-                          {isAdminOrHR && l.status === 'Pending' && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <button
-                                onClick={() => updateLeaveStatus(l.id, 'Approved')}
-                                className="p-1 rounded bg-emerald-50 hover:bg-emerald-500 hover:text-white text-emerald-600 dark:bg-emerald-950/30 transition-all cursor-pointer"
-                                title="Approve"
-                              >
-                                <HiCheck className="w-3 h-3" />
-                              </button>
-                              <button
-                                onClick={() => updateLeaveStatus(l.id, 'Rejected')}
-                                className="p-1 rounded bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 dark:bg-rose-950/30 transition-all cursor-pointer"
-                                title="Reject"
-                              >
-                                <HiX className="w-3 h-3" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" className="text-center py-12 text-slate-400">
-                      No leave requests filed.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          </form>
         </div>
+      ) : (
+        /* Leave Log List & Balance Cards (Standard View) */
+        <>
+          {/* Leave Balance Grid (Colorful Top-bordered borderless cards) */}
+          {myProfile && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+              
+              {/* Casual Leave */}
+              <div className="bg-white dark:bg-[#151c28] border-t-[5px] border-t-blue-500 rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_12px_25px_rgba(59,130,246,0.1)]">
+                <p className="text-[10px] text-slate-405 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Casual balance</p>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white font-mono">{myProfile.leaveBalance.casual} <span className="text-xs font-semibold text-slate-400">/ 10 Days</span></h3>
+              </div>
 
-      </div>
+              {/* Sick Leave */}
+              <div className="bg-white dark:bg-[#151c28] border-t-[5px] border-t-rose-500 rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_12px_25px_rgba(244,63,94,0.1)]">
+                <p className="text-[10px] text-slate-405 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Sick balance</p>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white font-mono">{myProfile.leaveBalance.sick} <span className="text-xs font-semibold text-slate-400">/ 6 Days</span></h3>
+              </div>
+
+              {/* Festival Leave */}
+              <div className="bg-white dark:bg-[#151c28] border-t-[5px] border-t-purple-500 rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_12px_25px_rgba(168,85,247,0.1)]">
+                <p className="text-[10px] text-slate-405 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Festival balance</p>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white font-mono">{myProfile.leaveBalance.festival !== undefined ? myProfile.leaveBalance.festival : 2} <span className="text-xs font-semibold text-slate-400">/ 2 Days</span></h3>
+              </div>
+
+              {/* Short Leave */}
+              <div className="bg-white dark:bg-[#151c28] border-t-[5px] border-t-amber-500 rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] hover:-translate-y-1 transition-all duration-300 hover:shadow-[0_12px_25px_rgba(245,158,11,0.1)]">
+                <p className="text-[10px] text-slate-405 dark:text-slate-400 font-bold uppercase tracking-wider mb-1">Short balance</p>
+                <h3 className="text-xl font-bold text-slate-800 dark:text-white font-mono">{myProfile.leaveBalance.short !== undefined ? myProfile.leaveBalance.short : 4} <span className="text-xs font-semibold text-slate-400">/ 4 (2 hrs)</span></h3>
+              </div>
+
+            </div>
+          )}
+
+          {/* Leave Requests Log List Table */}
+          <div className="bg-white dark:bg-[#151c28] border border-slate-200 dark:border-[#222e43] rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] overflow-hidden py-5 space-y-4">
+            
+            {/* Header info inside card */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-1 px-5">
+              <div className="flex items-center gap-2">
+                <HiOutlineBadgeCheck className="w-5 h-5 text-blue-500" />
+                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                  {isAdminOrHR ? "All Leave Requests" : "Your Leave Log"}
+                </h3>
+              </div>
+
+              {/* Page size selector */}
+              <div className="flex items-center gap-1.5 text-xs text-slate-550 dark:text-slate-400 font-medium">
+                <span>Show</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+                  className="bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-lg px-2 py-1 font-bold focus:outline-none focus:border-blue-500 text-slate-800 dark:text-slate-250 cursor-pointer"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+                <span>Records per page</span>
+              </div>
+            </div>
+
+            {/* Table wrapper touching card boundaries */}
+            <div className="overflow-x-auto border-y border-slate-200 dark:border-[#222e43]/60">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 dark:border-[#222e43] bg-slate-50/50 dark:bg-slate-900/50 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    <th className="border-r border-slate-200 dark:border-[#222e43] px-5 py-3.5">Employee</th>
+                    <th className="border-r border-slate-200 dark:border-[#222e43] px-5 py-3.5">Dates</th>
+                    <th className="border-r border-slate-200 dark:border-[#222e43] px-5 py-3.5">Type</th>
+                    <th className="border-r border-slate-200 dark:border-[#222e43] px-5 py-3.5">Reason</th>
+                    <th className="px-5 py-3.5 text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="text-xs">
+                  {(() => {
+                    const totalEntries = visibleLeaves.length;
+                    const startIndex = (currentPage - 1) * pageSize;
+                    const paginatedLeaves = visibleLeaves.slice(startIndex, startIndex + pageSize);
+
+                    if (paginatedLeaves.length === 0) {
+                      return (
+                        <tr>
+                          <td colSpan="5" className="text-center py-12 text-slate-450 border-b border-slate-200 dark:border-[#222e43]">
+                            No leave requests filed.
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return paginatedLeaves.map((l) => (
+                      <tr key={l.id} className="border-b border-slate-200 dark:border-[#222e43]/50 hover:bg-gray-100 dark:hover:bg-slate-800/40 transition-colors duration-150">
+                        {/* Employee */}
+                        <td className="border-r border-slate-200 dark:border-[#222e43]/50 px-5 py-3 font-bold text-slate-850 dark:text-slate-200">
+                          {l.employeeName}
+                        </td>
+
+                        {/* Dates */}
+                        <td className="border-r border-slate-200 dark:border-[#222e43]/50 px-5 py-3 text-slate-500 dark:text-slate-400 font-mono font-medium">
+                          {l.startDate} <span className="text-[10px] text-slate-400">to</span> {l.endDate}
+                          <div className="text-[10px] text-slate-450 dark:text-slate-550 font-bold mt-0.5">{l.days} Days</div>
+                        </td>
+
+                        {/* Leave Type */}
+                        <td className="border-r border-slate-200 dark:border-[#222e43]/50 px-5 py-3 text-slate-655 dark:text-slate-350 font-bold text-[10px] uppercase tracking-wider">
+                          {l.type}
+                        </td>
+
+                        {/* Reason */}
+                        <td className="border-r border-slate-200 dark:border-[#222e43]/50 px-5 py-3 text-slate-500 dark:text-slate-455 italic max-w-xs truncate" title={l.reason}>
+                          {l.reason}
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-5 py-3 text-center">
+                          <div className="flex flex-col items-center gap-1.5">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider
+                              ${l.status === 'Approved' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400' :
+                                l.status === 'Pending' ? 'bg-amber-50 text-amber-600 dark:bg-amber-955/20 dark:text-amber-400' :
+                                'bg-rose-50 text-rose-600 dark:bg-rose-955/20 dark:text-rose-455'}`}
+                            >
+                              {l.status}
+                            </span>
+
+                            {/* HR approval actions */}
+                            {isAdminOrHR && l.status === 'Pending' && (
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <button
+                                  onClick={() => updateLeaveStatus(l.id, 'Approved')}
+                                  className="p-1 rounded-md bg-emerald-50 hover:bg-emerald-500 hover:text-white text-emerald-600 dark:bg-emerald-950/30 transition-all cursor-pointer border border-emerald-200"
+                                  title="Approve"
+                                >
+                                  <HiCheck className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => updateLeaveStatus(l.id, 'Rejected')}
+                                  className="p-1 rounded-md bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 dark:bg-rose-955/30 transition-all cursor-pointer border border-rose-250"
+                                  title="Reject"
+                                >
+                                  <HiX className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ));
+                  })()}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Table Pagination Footer controls */}
+            {(() => {
+              const totalEntries = visibleLeaves.length;
+              const totalPages = Math.ceil(totalEntries / pageSize) || 1;
+              const startIndex = (currentPage - 1) * pageSize;
+
+              return (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 px-5">
+                  {/* Entries summary */}
+                  <div className="text-xs text-slate-450 dark:text-slate-400 font-semibold">
+                    {totalEntries > 0 ? (
+                      `Showing ${startIndex + 1} to ${Math.min(startIndex + pageSize, totalEntries)} of ${totalEntries} entries`
+                    ) : (
+                      'Showing 0 to 0 of 0 entries'
+                    )}
+                  </div>
+
+                  {/* Navigation buttons */}
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      Previous
+                    </button>
+
+                    {/* Page Index indicator */}
+                    <span className="w-7 h-7 flex items-center justify-center bg-blue-600 text-white rounded-lg text-xs font-bold shadow-sm font-mono">
+                      {currentPage}
+                    </span>
+
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      Next
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-800 text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                    >
+                      Last
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </>
+      )}
 
     </div>
   );

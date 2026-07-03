@@ -26,7 +26,7 @@ const initialEmployees = [
     emergencyContact: { name: 'Yasmin Ansari', relation: 'Spouse', phone: '+91 98765 43211' },
     photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', // female model/male model placeholder
     attendanceStats: { present: 22, absent: 0, halfDay: 0, late: 1 },
-    leaveBalance: { casual: 8, sick: 10, paid: 15 },
+    leaveBalance: { casual: 8, sick: 6, paid: 15, festival: 2, short: 4 },
     role: 'Admin'
   },
   {
@@ -44,13 +44,13 @@ const initialEmployees = [
     emergencyContact: { name: 'Ravi Sharma', relation: 'Father', phone: '+91 98123 45670' },
     photo: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
     attendanceStats: { present: 20, absent: 1, halfDay: 1, late: 0 },
-    leaveBalance: { casual: 6, sick: 8, paid: 12 },
+    leaveBalance: { casual: 6, sick: 4, paid: 12, festival: 2, short: 4 },
     role: 'HR'
   },
   {
     id: 'EMP003',
-    name: 'Siddharth Roy',
-    email: 'siddharth@ansariproduction.com',
+    name: 'Aakash Singh',
+    email: 'aakash.singh@ansariproduction.com',
     phone: '+91 97654 32109',
     department: 'Editing & Post-Production',
     designation: 'Chief Editor',
@@ -58,17 +58,17 @@ const initialEmployees = [
     status: 'Active',
     salary: 110000,
     gender: 'Male',
-    dob: '1990-05-18',
+    dob: '1990-07-05',
     emergencyContact: { name: 'Ananya Roy', relation: 'Mother', phone: '+91 97654 32100' },
-    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+    photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
     attendanceStats: { present: 21, absent: 1, halfDay: 0, late: 2 },
-    leaveBalance: { casual: 7, sick: 9, paid: 14 },
+    leaveBalance: { casual: 7, sick: 5, paid: 14, festival: 2, short: 4 },
     role: 'Employee'
   },
   {
     id: 'EMP004',
-    name: 'Zara Sheikh',
-    email: 'zara@ansariproduction.com',
+    name: 'AKASH Arya',
+    email: 'akash.arya@ansariproduction.com',
     phone: '+91 99887 76655',
     department: 'VFX & Animation',
     designation: 'Lead VFX Artist',
@@ -76,21 +76,21 @@ const initialEmployees = [
     status: 'Active',
     salary: 125000,
     gender: 'Female',
-    dob: '1994-09-05',
+    dob: '1994-07-06',
     emergencyContact: { name: 'Ahmad Sheikh', relation: 'Brother', phone: '+91 99887 76650' },
-    photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+    photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
     attendanceStats: { present: 19, absent: 2, halfDay: 1, late: 1 },
-    leaveBalance: { casual: 5, sick: 7, paid: 11 },
+    leaveBalance: { casual: 5, sick: 3, paid: 11, festival: 2, short: 4 },
     role: 'Employee'
   },
   {
     id: 'EMP005',
-    name: 'Kabir Mehta',
-    email: 'kabir@ansariproduction.com',
+    name: 'Dipesh Kumar',
+    email: 'dipesh@ansariproduction.com',
     phone: '+91 98989 89898',
     department: 'Camera & Production',
     designation: 'Director of Photography',
-    joiningDate: '2021-10-05',
+    joiningDate: '2021-07-23',
     status: 'Active',
     salary: 140000,
     gender: 'Male',
@@ -98,7 +98,7 @@ const initialEmployees = [
     emergencyContact: { name: 'Rita Mehta', relation: 'Spouse', phone: '+91 98989 89890' },
     photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
     attendanceStats: { present: 22, absent: 0, halfDay: 0, late: 0 },
-    leaveBalance: { casual: 9, sick: 10, paid: 15 },
+    leaveBalance: { casual: 9, sick: 6, paid: 15, festival: 2, short: 4 },
     role: 'Employee'
   }
 ];
@@ -201,6 +201,32 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('settings', JSON.stringify(settings));
   }, [settings]);
+
+  useEffect(() => {
+    setEmployees(prev => {
+      let changed = false;
+      const updated = prev.map(e => {
+        const updatedBal = { ...e.leaveBalance };
+        if (updatedBal.sick > 6) {
+          updatedBal.sick = 6;
+          changed = true;
+        }
+        if (updatedBal.festival === undefined) {
+          updatedBal.festival = 2;
+          changed = true;
+        }
+        if (updatedBal.short === undefined) {
+          updatedBal.short = 4;
+          changed = true;
+        }
+        if (changed) {
+          return { ...e, leaveBalance: updatedBal };
+        }
+        return e;
+      });
+      return changed ? updated : prev;
+    });
+  }, []);
 
   const login = (emailOrPhone, password, chosenRole) => {
     // Demo login helper: matches prefix or custom option

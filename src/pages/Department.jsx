@@ -4,7 +4,7 @@ import { HiOutlineOfficeBuilding, HiPlus, HiOutlineUserGroup } from 'react-icons
 
 const Department = () => {
   const { departments, createDepartment, employees } = useData();
-  
+
   // Create state
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
@@ -27,9 +27,9 @@ const Department = () => {
 
   return (
     <div className="space-y-6">
-      
+
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        
+
         {/* Create Department Form */}
         <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
           <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -46,7 +46,7 @@ const Department = () => {
           <form onSubmit={handleCreate} className="space-y-4 text-xs">
             <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Department Name</label>
-              <input 
+              <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -58,7 +58,7 @@ const Department = () => {
             <div className="grid grid-cols-3 gap-2">
               <div className="col-span-1">
                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Code</label>
-                <input 
+                <input
                   type="text"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
@@ -68,7 +68,7 @@ const Department = () => {
               </div>
               <div className="col-span-2">
                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Lead / Manager</label>
-                <input 
+                <input
                   type="text"
                   value={manager}
                   onChange={(e) => setManager(e.target.value)}
@@ -115,12 +115,12 @@ const Department = () => {
                     <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Assigned Members</p>
                     <div className="flex -space-x-2 overflow-hidden">
                       {crew.map((member, idx) => (
-                        <img 
+                        <img
                           key={member.id}
-                          src={member.photo} 
-                          alt={member.name} 
+                          src={member.photo}
+                          alt={member.name}
                           title={member.name}
-                          className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 object-cover" 
+                          className="inline-block h-6 w-6 rounded-full ring-2 ring-white dark:ring-slate-900 object-cover"
                         />
                       ))}
                       {crew.length === 0 && <span className="text-[10px] text-slate-450 italic">No members assigned</span>}

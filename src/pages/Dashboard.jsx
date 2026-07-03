@@ -5,10 +5,10 @@ import { MiniChart } from '../components/MiniChart';
 import EmployeeDashboard from './EmployeeDashboard';
 import { BarChart as MuiBarChart } from '@mui/x-charts/BarChart';
 import { PieChart as MuiPieChart } from '@mui/x-charts/PieChart';
-import { 
-  HiOutlineUsers, 
-  HiOutlineOfficeBuilding, 
-  HiOutlineCheckCircle, 
+import {
+  HiOutlineUsers,
+  HiOutlineOfficeBuilding,
+  HiOutlineCheckCircle,
   HiOutlineClock,
   HiOutlineSparkles,
   HiOutlineUserAdd,
@@ -31,7 +31,7 @@ const Dashboard = () => {
     const saved = localStorage.getItem('customEvents');
     return saved ? JSON.parse(saved) : [];
   });
-  
+
   const [notices, setNotices] = useState(() => {
     const saved = localStorage.getItem('notices');
     return saved ? JSON.parse(saved) : [
@@ -39,10 +39,10 @@ const Dashboard = () => {
       { id: 2, title: 'Office Refurbishment Schedule', content: 'Post-production bay edits will be upgraded this weekend. Please backup your local directories.', date: 'June 29, 2026', author: 'Farhan Ansari (Admin)' }
     ];
   });
-  
+
   const [showEventModal, setShowEventModal] = useState(false);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
-  
+
   const [newEvent, setNewEvent] = useState({ name: '', type: 'birthday', date: '', details: '' });
   const [newNotice, setNewNotice] = useState({ title: '', content: '' });
 
@@ -92,7 +92,7 @@ const Dashboard = () => {
   const totalEmployees = employees.length;
   const totalDepts = departments.length;
   const pendingLeaves = leaves.filter(l => l.status === 'Pending');
-  
+
   // Find present today
   const today = '2026-06-27'; // simulated today date matching mock data
   const todayRecords = attendance[today] || {};
@@ -177,7 +177,7 @@ const Dashboard = () => {
     const cutoffDate = new Date(2026, 2 + idx, 31);
     const dataObj = { month };
     departments.forEach(dept => {
-      // sum of salaries of crew members of this department hired before cutoffDate
+      // sum of salaries ofEmployee members of this department hired before cutoffDate
       const amount = employees
         .filter(e => e.department === dept.name && new Date(e.joiningDate) <= cutoffDate)
         .reduce((sum, e) => sum + (e.salary || 0), 0);
@@ -204,51 +204,86 @@ const Dashboard = () => {
         /* ================= ADMIN / HR DASHBOARD ================= */
         <>
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            
-            {/* Stat Card 1 */}
-            <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl flex items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-md">
-              <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl">
-                <HiOutlineUsers className="w-6 h-6" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+            {/* Stat Card 1: Total Employees */}
+            <div className="bg-white dark:bg-[#151c28] border-t-[6px] border-t-orange-500 border-x border-b border-slate-200 dark:border-x-[#222e43] dark:border-b-[#222e43] rounded-2xl p-5 flex justify-between items-start shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.25)] hover:shadow-[0_15px_35px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_15px_35px_rgba(249,115,22,0.2)] hover:-translate-y-1 hover:border-orange-500/30 transition-all duration-300 transform-gpu">
+              <div className="flex flex-col justify-between h-[115px] flex-1">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-[#94a3b8] uppercase tracking-wider">Total Employees</p>
+                  <h3 className="text-3xl font-bold mt-2 text-slate-800 dark:text-white tracking-tight">{totalEmployees}</h3>
+                </div>
+                <div className="flex items-center gap-2 mt-4">
+                  <div className="flex items-center gap-1 text-[11px] text-orange-600 dark:text-orange-400 font-extrabold">
+                    <svg className="w-3 h-3 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    <span>+3 this month</span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider">Total Crew</p>
-                <h3 className="text-2xl font-black mt-0.5 text-slate-800 dark:text-white">{totalEmployees}</h3>
+              <div className="w-10 h-10 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-500/20 text-orange-500 dark:text-orange-400 rounded-xl flex items-center justify-center flex-shrink-0">
+                <HiOutlineUsers className="w-5 h-5" />
               </div>
             </div>
 
-            {/* Stat Card 2 */}
-            <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl flex items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-md">
-              <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl">
-                <HiOutlineOfficeBuilding className="w-6 h-6" />
+            {/* Stat Card 2: Departments */}
+            <div className="bg-white dark:bg-[#151c28] border-t-[6px] border-t-emerald-500 border-x border-b border-slate-200 dark:border-x-[#222e43] dark:border-b-[#222e43] rounded-2xl p-5 flex justify-between items-start shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.25)] hover:shadow-[0_15px_35px_rgba(16,185,129,0.15)] dark:hover:shadow-[0_15px_35px_rgba(16,185,129,0.2)] hover:-translate-y-1 hover:border-emerald-500/30 transition-all duration-300 transform-gpu">
+              <div className="flex flex-col justify-between h-[115px] flex-1">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-[#94a3b8] uppercase tracking-wider">Total Departments</p>
+                  <h3 className="text-3xl font-bold mt-2 text-emerald-655 dark:text-emerald-500 tracking-tight">{totalDepts}</h3>
+                </div>
+                <div className="flex items-center gap-2 mt-4">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-405 font-bold">
+                    Active rate: <span className="text-emerald-650 dark:text-emerald-400 font-black">100%</span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider">Departments</p>
-                <h3 className="text-2xl font-black mt-0.5 text-slate-800 dark:text-white">{totalDepts}</h3>
-              </div>
-            </div>
-
-            {/* Stat Card 3 */}
-            <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl flex items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-md">
-              <div className="p-3 bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400 rounded-xl">
-                <HiOutlineCheckCircle className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-xs text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider">Active Today</p>
-                <h3 className="text-2xl font-black mt-0.5 text-slate-800 dark:text-white">
-                  {presentToday} <span className="text-sm font-semibold text-slate-400">/ {totalEmployees}</span>
-                </h3>
+              <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-500/20 text-emerald-500 dark:text-emerald-450 rounded-xl flex items-center justify-center flex-shrink-0">
+                <HiOutlineOfficeBuilding className="w-5 h-5" />
               </div>
             </div>
 
-            {/* Stat Card 4 */}
-            <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl flex items-center gap-4 transition-all hover:-translate-y-1 hover:shadow-md">
-              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 rounded-xl">
-                <HiOutlineClock className="w-6 h-6" />
+            {/* Stat Card 3: Active Today */}
+            <div className="bg-white dark:bg-[#151c28] border-t-[6px] border-t-rose-500 border-x border-b border-slate-200 dark:border-x-[#222e43] dark:border-b-[#222e43] rounded-2xl p-5 flex justify-between items-start shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.25)] hover:shadow-[0_15px_35px_rgba(244,63,94,0.15)] dark:hover:shadow-[0_15px_35px_rgba(244,63,94,0.2)] hover:-translate-y-1 hover:border-rose-500/30 transition-all duration-300 transform-gpu">
+              <div className="flex flex-col justify-between h-[115px] flex-1">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-[#94a3b8] uppercase tracking-wider">Active Today</p>
+                  <h3 className="text-3xl font-bold mt-2 text-rose-605 dark:text-rose-500 tracking-tight">
+                    {presentToday}<span className="text-lg font-medium text-slate-400">/{totalEmployees}</span>
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2 mt-4">
+                  <div className="text-[11px] text-slate-500 dark:text-slate-405 font-bold">
+                    Attendance: <span className="text-rose-650 dark:text-rose-455 font-black">{presentRate}%</span>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-slate-450 dark:text-slate-500 font-bold uppercase tracking-wider">Leaves Pending</p>
-                <h3 className="text-2xl font-black mt-0.5 text-slate-800 dark:text-white">{pendingLeaves.length}</h3>
+              <div className="w-10 h-10 bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-500/20 text-rose-500 dark:text-rose-450 rounded-xl flex items-center justify-center flex-shrink-0">
+                <HiOutlineCheckCircle className="w-5 h-5" />
+              </div>
+            </div>
+
+            {/* Stat Card 4: Reports / Pending Leaves */}
+            <div className="bg-white dark:bg-[#151c28] border-t-[6px] border-t-purple-500 border-x border-b border-slate-200 dark:border-x-[#222e43] dark:border-b-[#222e43] rounded-2xl p-5 flex justify-between items-start shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.25)] hover:shadow-[0_15px_35px_rgba(168,85,247,0.15)] dark:hover:shadow-[0_15px_35px_rgba(168,85,247,0.2)] hover:-translate-y-1 hover:border-purple-500/30 transition-all duration-300 transform-gpu">
+              <div className="flex flex-col justify-between h-[115px] flex-1 text-left">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 dark:text-[#94a3b8] uppercase tracking-wider">Reports & Leaves</p>
+                  <h4 className="text-[13px] font-bold text-slate-800 dark:text-white mt-2 leading-tight">Review Leaves</h4>
+                  <p className="text-[10px] text-slate-450 dark:text-slate-500 font-semibold mt-0.5">{pendingLeaves.length} pending requests</p>
+                </div>
+                <div className="mt-auto">
+                  <span 
+                    onClick={(e) => { e.stopPropagation(); navigate('/leaves'); }}
+                    className="text-[11px] font-extrabold text-purple-600 dark:text-purple-400 hover:underline inline-flex items-center gap-1"
+                  >
+                    View Details &rarr;
+                  </span>
+                </div>
+              </div>
+              <div className="w-10 h-10 bg-purple-50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-500/20 text-purple-500 dark:text-purple-400 rounded-xl flex items-center justify-center flex-shrink-0">
+                <HiOutlineClock className="w-5 h-5" />
               </div>
             </div>
 
@@ -256,7 +291,7 @@ const Dashboard = () => {
 
           {/* Charts & Analytics */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
+
             {/* Attendance Overview Pie/Donut Chart */}
             <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl flex flex-col justify-between">
               <div>
@@ -267,7 +302,7 @@ const Dashboard = () => {
                   </div>
                   <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Distribution</span>
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row items-center gap-4">
                   {/* Donut Chart (Left) */}
                   <div className="relative flex items-center justify-center flex-shrink-0 w-[140px] h-[140px] mx-auto">
@@ -321,21 +356,25 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Department Growth Monthly Budget bar chart */}
+            {/* Department Distribution bar chart */}
             <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/80 rounded-2xl flex flex-col justify-between">
               <div>
-                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">Department Growth (Monthly Payroll)</h3>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-4">Department payroll budget growth by month</p>
+                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">Department Registers</h3>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-4">Total headcount distribution across departments</p>
               </div>
               <div className="w-full flex justify-center h-[200px]">
-                {deptGrowthSeries.length > 0 ? (
+                {deptDistribution.length > 0 ? (
                   <MuiBarChart
-                    xAxis={[{ scaleType: 'band', data: growthMonths }]}
-                    series={deptGrowthSeries}
+                    xAxis={[{ scaleType: 'band', data: deptDistribution.map(d => d.label) }]}
+                    series={[{
+                      data: deptDistribution.map(d => d.value),
+                      label: 'Employees',
+                      color: '#e50914'
+                    }]}
                     height={200}
                   />
                 ) : (
-                  <div className="h-[200px] flex items-center justify-center text-xs text-slate-400">No growth data available</div>
+                  <div className="h-[200px] flex items-center justify-center text-xs text-slate-400">No distribution data available</div>
                 )}
               </div>
             </div>
@@ -350,7 +389,7 @@ const Dashboard = () => {
                 <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">Bulletin Notice Board</h3>
               </div>
               {isAdminOrHR && (
-                <button 
+                <button
                   onClick={() => setShowNoticeModal(true)}
                   className="px-3 py-1 text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-lg border border-indigo-100 dark:border-indigo-900 hover:bg-indigo-100 dark:hover:bg-indigo-950/80 transition-all cursor-pointer"
                 >
@@ -358,7 +397,7 @@ const Dashboard = () => {
                 </button>
               )}
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {notices.map(notice => (
                 <div key={notice.id} className="p-4 rounded-xl border border-slate-100 dark:border-slate-850/80 bg-slate-50/20 dark:bg-slate-950/10 hover:shadow-xs transition-shadow">
@@ -383,10 +422,10 @@ const Dashboard = () => {
               {activities.slice(0, 5).map((act) => (
                 <div key={act.id} className="flex items-start gap-4 p-3 rounded-xl hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-all border border-transparent hover:border-slate-100/50 dark:hover:border-slate-850/50">
                   <div className={`w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0 ring-4 
-                    ${act.type === 'leave' ? 'bg-amber-500 ring-amber-100 dark:ring-amber-950/40' : 
-                      act.type === 'attendance' ? 'bg-indigo-500 ring-indigo-100 dark:ring-indigo-950/40' : 
-                      act.type === 'payroll' ? 'bg-violet-500 ring-violet-100 dark:ring-violet-950/40' : 
-                      'bg-emerald-500 ring-emerald-100 dark:ring-emerald-950/40'}`} 
+                    ${act.type === 'leave' ? 'bg-amber-500 ring-amber-100 dark:ring-amber-950/40' :
+                      act.type === 'attendance' ? 'bg-indigo-500 ring-indigo-100 dark:ring-indigo-950/40' :
+                        act.type === 'payroll' ? 'bg-violet-500 ring-violet-100 dark:ring-violet-950/40' :
+                          'bg-emerald-500 ring-emerald-100 dark:ring-emerald-950/40'}`}
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-slate-700 dark:text-slate-300 font-semibold leading-normal">{act.text}</p>
@@ -408,19 +447,19 @@ const Dashboard = () => {
                   </div>
                   {/* Category Selector */}
                   <div className="flex bg-slate-100 dark:bg-slate-800/60 p-0.5 rounded-lg text-[10px]">
-                    <button 
+                    <button
                       onClick={() => setCelebrationTab('all')}
                       className={`px-2 py-1 rounded-md font-bold transition-all ${celebrationTab === 'all' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-xs' : 'text-slate-500'}`}
                     >
                       All
                     </button>
-                    <button 
+                    <button
                       onClick={() => setCelebrationTab('birthday')}
                       className={`px-2 py-1 rounded-md font-bold transition-all ${celebrationTab === 'birthday' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-xs' : 'text-slate-500'}`}
                     >
                       🎂
                     </button>
-                    <button 
+                    <button
                       onClick={() => setCelebrationTab('anniversary')}
                       className={`px-2 py-1 rounded-md font-bold transition-all ${celebrationTab === 'anniversary' ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-xs' : 'text-slate-500'}`}
                     >
@@ -428,9 +467,9 @@ const Dashboard = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Add Event Button */}
-                <button 
+                <button
                   onClick={() => setShowEventModal(true)}
                   className="px-3 py-1 text-[10px] font-bold bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-455 rounded-lg border border-rose-100 dark:border-rose-900 hover:bg-rose-100 dark:hover:bg-rose-950/60 transition-all cursor-pointer"
                 >
@@ -472,19 +511,19 @@ const Dashboard = () => {
                 <form onSubmit={handleAddEvent} className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-450 uppercase mb-1">Name</label>
-                    <input 
-                      type="text" 
-                      required 
-                      value={newEvent.name} 
-                      onChange={e => setNewEvent({...newEvent, name: e.target.value})} 
-                      className="w-full px-3 py-2 text-xs border border-slate-205 dark:border-slate-800 rounded-lg focus:outline-indigo-500 bg-transparent text-slate-850 dark:text-white" 
+                    <input
+                      type="text"
+                      required
+                      value={newEvent.name}
+                      onChange={e => setNewEvent({ ...newEvent, name: e.target.value })}
+                      className="w-full px-3 py-2 text-xs border border-slate-205 dark:border-slate-800 rounded-lg focus:outline-indigo-500 bg-transparent text-slate-850 dark:text-white"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-455 uppercase mb-1">Event Type</label>
-                    <select 
-                      value={newEvent.type} 
-                      onChange={e => setNewEvent({...newEvent, type: e.target.value})} 
+                    <select
+                      value={newEvent.type}
+                      onChange={e => setNewEvent({ ...newEvent, type: e.target.value })}
                       className="w-full px-3 py-2 text-xs border border-slate-205 dark:border-slate-800 rounded-lg focus:outline-indigo-500 bg-transparent text-slate-850 dark:text-white dark:bg-slate-900"
                     >
                       <option value="birthday">Birthday</option>
@@ -493,22 +532,22 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-450 uppercase mb-1">Date</label>
-                    <input 
-                      type="date" 
-                      required 
-                      value={newEvent.date} 
-                      onChange={e => setNewEvent({...newEvent, date: e.target.value})} 
-                      className="w-full px-3 py-2 text-xs border border-slate-205 dark:border-slate-800 rounded-lg focus:outline-indigo-500 bg-transparent text-slate-855 dark:text-white" 
+                    <input
+                      type="date"
+                      required
+                      value={newEvent.date}
+                      onChange={e => setNewEvent({ ...newEvent, date: e.target.value })}
+                      className="w-full px-3 py-2 text-xs border border-slate-205 dark:border-slate-800 rounded-lg focus:outline-indigo-500 bg-transparent text-slate-855 dark:text-white"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-455 uppercase mb-1">Description / Details</label>
-                    <input 
-                      type="text" 
-                      value={newEvent.details} 
-                      onChange={e => setNewEvent({...newEvent, details: e.target.value})} 
+                    <input
+                      type="text"
+                      value={newEvent.details}
+                      onChange={e => setNewEvent({ ...newEvent, details: e.target.value })}
                       placeholder="e.g. 5 Years Anniversary"
-                      className="w-full px-3 py-2 text-xs border border-slate-205 dark:border-slate-800 rounded-lg focus:outline-indigo-500 bg-transparent text-slate-855 dark:text-white" 
+                      className="w-full px-3 py-2 text-xs border border-slate-205 dark:border-slate-800 rounded-lg focus:outline-indigo-500 bg-transparent text-slate-855 dark:text-white"
                     />
                   </div>
                   <button type="submit" className="w-full py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-bold transition-all cursor-pointer">
@@ -530,22 +569,22 @@ const Dashboard = () => {
                 <form onSubmit={handleAddNotice} className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-450 uppercase mb-1">Title</label>
-                    <input 
-                      type="text" 
-                      required 
-                      value={newNotice.title} 
-                      onChange={e => setNewNotice({...newNotice, title: e.target.value})} 
-                      className="w-full px-3 py-2 text-xs border border-slate-205 dark:border-slate-800 rounded-lg focus:outline-indigo-500 bg-transparent text-slate-850 dark:text-white" 
+                    <input
+                      type="text"
+                      required
+                      value={newNotice.title}
+                      onChange={e => setNewNotice({ ...newNotice, title: e.target.value })}
+                      className="w-full px-3 py-2 text-xs border border-slate-205 dark:border-slate-800 rounded-lg focus:outline-indigo-500 bg-transparent text-slate-850 dark:text-white"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-slate-455 uppercase mb-1">Notice Content</label>
-                    <textarea 
-                      required 
+                    <textarea
+                      required
                       rows={3}
-                      value={newNotice.content} 
-                      onChange={e => setNewNotice({...newNotice, content: e.target.value})} 
-                      className="w-full px-3 py-2 text-xs border border-slate-205 dark:border-slate-800 rounded-lg focus:outline-indigo-500 bg-transparent text-slate-855 dark:text-white" 
+                      value={newNotice.content}
+                      onChange={e => setNewNotice({ ...newNotice, content: e.target.value })}
+                      className="w-full px-3 py-2 text-xs border border-slate-205 dark:border-slate-800 rounded-lg focus:outline-indigo-500 bg-transparent text-slate-855 dark:text-white"
                     />
                   </div>
                   <button type="submit" className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all cursor-pointer">

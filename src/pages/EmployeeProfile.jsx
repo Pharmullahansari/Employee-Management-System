@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { MiniChart } from '../components/MiniChart';
-import { 
-  HiOutlineUser, 
-  HiOutlineCalendar, 
-  HiOutlineClipboardList, 
-  HiOutlineCurrencyRupee, 
+import {
+  HiOutlineUser,
+  HiOutlineCalendar,
+  HiOutlineClipboardList,
+  HiOutlineCurrencyRupee,
   HiOutlineFolderOpen,
   HiOutlineChevronLeft,
   HiOutlineMail,
@@ -30,7 +30,7 @@ const EmployeeProfile = () => {
     return (
       <div className="text-center py-12 text-slate-500">
         <p className="font-bold">Employee records not found.</p>
-        <button 
+        <button
           onClick={() => navigate('/')}
           className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs"
         >
@@ -54,21 +54,21 @@ const EmployeeProfile = () => {
 
   return (
     <div className="space-y-6">
-      
+
       {/* Header Back Button */}
-      <button 
+      <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-indigo-650 dark:hover:text-indigo-400 transition-colors cursor-pointer"
       >
         <HiOutlineChevronLeft className="w-4 h-4" />
-        Back to Crew List
+        Back toEmployee List
       </button>
 
       {/* Hero card */}
       <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs flex flex-col md:flex-row items-center gap-6">
-        <img 
-          src={emp.photo} 
-          alt={emp.name} 
+        <img
+          src={emp.photo}
+          alt={emp.name}
           className="w-24 h-24 rounded-2xl object-cover ring-4 ring-indigo-500/10"
         />
         <div className="flex-1 text-center md:text-left">
@@ -113,8 +113,8 @@ const EmployeeProfile = () => {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 pb-3 text-xs font-semibold border-b-2 transition-all px-1 whitespace-nowrap cursor-pointer
-              ${activeTab === tab.id 
-                ? 'border-indigo-600 text-indigo-650 dark:text-indigo-400 font-bold' 
+              ${activeTab === tab.id
+                ? 'border-indigo-600 text-indigo-650 dark:text-indigo-400 font-bold'
                 : 'border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
           >
             <tab.icon className="w-4.5 h-4.5" />
@@ -125,7 +125,7 @@ const EmployeeProfile = () => {
 
       {/* Tab Panels */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-6 shadow-xs min-h-[220px]">
-        
+
         {/* Personal Details Panel */}
         {activeTab === 'personal' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -170,7 +170,7 @@ const EmployeeProfile = () => {
               <MiniChart type="donut" data={[96]} height={110} />
               <p className="text-xs font-bold mt-2 text-slate-800 dark:text-white">Active Duty Score</p>
             </div>
-            
+
             <div className="md:col-span-2 space-y-4 text-xs">
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Attendance Breakdown (Current Month)</h4>
               <div className="grid grid-cols-3 gap-3">
@@ -214,7 +214,7 @@ const EmployeeProfile = () => {
             {employeeLeaves.length > 0 ? (
               <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
                 <table className="w-full text-left">
-                  <thead className="bg-slate-50/50 dark:bg-slate-900/50 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  <thead className="bg-slate-50/50 dark:bg-slate-900/50 text-[10px] font-semibold text-black dark:text-slate-200 uppercase tracking-wider">
                     <tr>
                       <th className="px-4 py-2">Type</th>
                       <th className="px-4 py-2">Dates</th>
@@ -234,7 +234,7 @@ const EmployeeProfile = () => {
                           <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase
                             ${l.status === 'Approved' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400' :
                               l.status === 'Pending' ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400' :
-                              'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-455'}`}
+                                'bg-rose-50 text-rose-600 dark:bg-rose-950/20 dark:text-rose-455'}`}
                           >
                             {l.status}
                           </span>
@@ -255,7 +255,7 @@ const EmployeeProfile = () => {
           <div className="space-y-4 text-xs">
             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Earnings Breakdown</h4>
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              
+
               <div className="p-4 bg-slate-50 dark:bg-slate-950/30 border border-slate-100 dark:border-slate-800 rounded-xl">
                 <p className="text-slate-400 font-bold mb-1">Base Monthly Salary</p>
                 <h3 className="text-base font-black text-slate-800 dark:text-white font-mono">₹{emp.salary.toLocaleString('en-IN')}</h3>

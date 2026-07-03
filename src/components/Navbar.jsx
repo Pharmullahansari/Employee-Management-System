@@ -29,7 +29,6 @@ const Navbar = ({ onMenuClick }) => {
     if (path === '/leaves') return 'Leave Dashboard';
     if (path === '/payroll') return 'Payroll & Payslips';
     if (path === '/departments') return 'Departments';
-    if (path === '/reports') return 'Reports & Analytics';
     if (path === '/settings') return 'Control Panel Settings';
     if (path.startsWith('/profile/')) return 'Employee Profile';
     return 'Ansari Production';

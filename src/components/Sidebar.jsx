@@ -22,12 +22,10 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const menuItems = [
     { name: 'Dashboard', path: '/', icon: HiOutlineViewGrid, roles: ['Admin', 'HR', 'Employee'] },
     { name: 'Employees', path: '/employees', icon: HiOutlineUsers, roles: ['Admin', 'HR'] },
-    { name: 'Add Employee', path: '/add-employee', icon: HiOutlineUserAdd, roles: ['Admin', 'HR'] },
     { name: 'Attendance', path: '/attendance', icon: HiOutlineCalendar, roles: ['Admin', 'HR', 'Employee'] },
     { name: 'Leaves', path: '/leaves', icon: HiOutlineClipboardList, roles: ['Admin', 'HR', 'Employee'] },
     { name: 'Payroll', path: '/payroll', icon: HiOutlineCreditCard, roles: ['Admin', 'HR', 'Employee'] },
     { name: 'Departments', path: '/departments', icon: HiOutlineOfficeBuilding, roles: ['Admin', 'HR'] },
-    { name: 'Reports & Analytics', path: '/reports', icon: HiOutlineChartBar, roles: ['Admin', 'HR'] },
     { name: 'Settings', path: '/settings', icon: HiOutlineCog, roles: ['Admin', 'HR', 'Employee'] },
   ];
 
